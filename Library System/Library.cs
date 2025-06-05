@@ -56,14 +56,59 @@ namespace Library_System
             var bookToBorrow = books.FirstOrDefault(b => b.Title == title && b.PublicationYear == publicationYear && b.IsAvailable);
             if (bookToBorrow != null)
             {
-                bookToBorrow.IsAvailable = false; // Mark the book as borrowed
-                member.BorrowedBooksCount++; // Increment the borrowed books count for the member
+                bookToBorrow.IsAvailable = false;
+                member.BorrowedBooksCount++;
 
             }
             else
             {
                 throw new ArgumentException("Book not available for borrowing.");
             }
+        }
 
+        public void return_book(string title, int publicationYear, int memberId)
+        {
+            var member = members.FirstOrDefault(m => m.MemberID == memberId);
+            if (member == null)
+            {
+                throw new ArgumentException("Member not found.");
+            }
+            var bookToReturn = books.FirstOrDefault(b => b.Title == title && b.PublicationYear == publicationYear && !b.IsAvailable);
+            if (bookToReturn != null)
+            {
+                bookToReturn.IsAvailable = true;
+                member.BorrowedBooksCount--;
+            }
+            else
+            {
+                throw new ArgumentException("Book not found or not borrowed by this member.");
+            }
+        }
+
+        public void display_books()
+        {
+            if (books.Count == 0)
+            {
+                Console.WriteLine("No books available in the library.");
+                return;
+            }
+            foreach (var book in books)
+            {
+                Console.WriteLine($"Title: {book.Title}, Author: {book.Author}, Year: {book.PublicationYear}, Category: {book.Catagory}, Available: {book.IsAvailable}");
+            }
+        }
+
+        public void display_members()
+        {
+            if (members.Count == 0)
+            {
+                Console.WriteLine("No members registered in the library.");
+                return;
+            }
+            foreach (var member in members)
+            {
+                Console.WriteLine($"Name: {member.Name}, ID: {member.MemberID}, Type: {member.Type}, Borrowed Books: {member.BorrowedBooksCount}");
+            }
         }
     }
+}
