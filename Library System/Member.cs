@@ -19,7 +19,7 @@ namespace Library_System
         public int MemberID { get; set; }
         public MemberType Type { get; set; }
 
-        public int BorrowedBooksCount { get; private set; } = 0;
+        public int BorrowedBooksCount { get; set; } = 0;
 
         public Member(string name, int memberId, MemberType type)
         {
