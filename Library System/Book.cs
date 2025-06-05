@@ -9,7 +9,7 @@
             History,
             Child
         }
-        public required string Title { get; set; }
+        public string Title { get; set; }
         public string Author { get; set; }
 
         private int publicationYear;
@@ -31,7 +31,7 @@
             }
         }
         public BookCategory Catagory { get; set; }
-        private bool IsAvailable { get; set; }
+        public bool IsAvailable { get; set; }
 
         public Book(string title, string author, int publicationYear, BookCategory catagory)
         {
