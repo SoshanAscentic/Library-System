@@ -2,7 +2,14 @@
 {
     internal class Book
     {
-        public string Title { get; set; }
+
+        public enum BookCategory
+        {
+            Fiction,
+            History,
+            Child
+        }
+        public required string Title { get; set; }
         public string Author { get; set; }
 
         private int publicationYear;
@@ -23,10 +30,10 @@
                 }
             }
         }
-        private string Catagory { get; set; }
+        public BookCategory Catagory { get; set; }
         private bool IsAvailable { get; set; }
 
-        public Book(string title, string author, int publicationYear, string catagory)
+        public Book(string title, string author, int publicationYear, BookCategory catagory)
         {
             Title = title;
             Author = author;
@@ -34,9 +41,5 @@
             Catagory = catagory;
             IsAvailable = true; // Default to available
         }
-
-        
     }
-
-
 }
