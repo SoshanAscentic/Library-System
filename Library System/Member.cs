@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Library_System
 {
-    internal class Member
+    public class Member
     {
         public enum MemberType
         {
@@ -15,8 +15,8 @@ namespace Library_System
             Management
         }
 
-        public required string Name { get; set; }
-        public int MemberID { get; set; }
+        public string Name { get; set; }
+        public int MemberID { get; private set; }
         public MemberType Type { get; set; }
 
         public int BorrowedBooksCount { get; set; } = 0;
