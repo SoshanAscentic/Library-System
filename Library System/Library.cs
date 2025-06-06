@@ -13,9 +13,9 @@ namespace Library_System
     {
         private List<Book> books = new List<Book>();
         private List<Member> members = new List<Member>();
-        private int nextMemberId = 1; //This is to give the next member a unique ID.
+        private int nextMemberId = 1;
 
-        public void add_book(Book book)
+        public void AddBook(Book book)
         {
             if (book == null)
             {
@@ -24,20 +24,31 @@ namespace Library_System
             books.Add(book);
         }
 
-        public void add_member(Member member)
+        public Member AddMember(string name, Member.MemberType type)
         {
-            if (member == null)
+            if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentNullException(nameof(member), "Member cannot be null.");
+                throw new ArgumentException("Name cannot be null or empty.", nameof(name));
             }
 
-            var newMember = new Member(member.Name, nextMemberId++, member.Type);
-            nextMemberId++;
-            members.Add(member);
+            var newMember = new Member(name, nextMemberId++, type);
+            members.Add(newMember);
+            return newMember;
         }
-        public void remove_book(string title, int publicationYear)
+
+        public Member? GetMemberById(int memberId)
         {
-            var bookToRemove = books.FirstOrDefault(b => b.Title == title && b.PublicationYear == publicationYear); //this is a LINQ query that searches for the book by title and publication year
+            return members.FirstOrDefault(m => m.MemberID == memberId);
+        }
+
+        public void RemoveBook(string title, int publicationYear)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                throw new ArgumentException("Title cannot be null or empty.", nameof(title));
+            }
+
+            var bookToRemove = books.FirstOrDefault(b => b.Title == title && b.PublicationYear == publicationYear);
             if (bookToRemove != null)
             {
                 books.Remove(bookToRemove);
@@ -48,8 +59,13 @@ namespace Library_System
             }
         }
 
-        public void borrow_book(string title, int publicationYear, int memberId)
+        public void BorrowBook(string title, int publicationYear, int memberId)
         {
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                throw new ArgumentException("Title cannot be null or empty.", nameof(title));
+            }
+
             var member = members.FirstOrDefault(m => m.MemberID == memberId);
             if (member == null)
             {
@@ -73,13 +89,19 @@ namespace Library_System
             }
         }
 
-        public void return_book(string title, int publicationYear, int memberId)
+        public void ReturnBook(string title, int publicationYear, int memberId)
         {
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                throw new ArgumentException("Title cannot be null or empty.", nameof(title));
+            }
+
             var member = members.FirstOrDefault(m => m.MemberID == memberId);
             if (member == null)
             {
                 throw new ArgumentException("Member not found.");
             }
+
             var bookToReturn = books.FirstOrDefault(b => b.Title == title && b.PublicationYear == publicationYear && !b.IsAvailable);
             if (bookToReturn != null)
             {
@@ -92,7 +114,7 @@ namespace Library_System
             }
         }
 
-        public void display_books()
+        public void DisplayBooks()
         {
             if (books.Count == 0)
             {
@@ -105,7 +127,7 @@ namespace Library_System
             }
         }
 
-        public void display_members()
+        public void DisplayMembers()
         {
             if (members.Count == 0)
             {
