@@ -13,7 +13,6 @@ namespace Library_System
     {
         private List<Book> books = new List<Book>();
         private List<Member> members = new List<Member>();
-        Member member;
 
         public void add_book(Book book)
         {
@@ -53,12 +52,16 @@ namespace Library_System
                 throw new ArgumentException("Member not found.");
             }
 
+            if (member.Type != Member.MemberType.Member)
+            {
+                throw new InvalidOperationException("Only members of type 'Member' can borrow books.");
+            }
+
             var bookToBorrow = books.FirstOrDefault(b => b.Title == title && b.PublicationYear == publicationYear && b.IsAvailable);
             if (bookToBorrow != null)
             {
                 bookToBorrow.IsAvailable = false;
                 member.BorrowedBooksCount++;
-
             }
             else
             {
