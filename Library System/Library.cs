@@ -13,6 +13,7 @@ namespace Library_System
     {
         private List<Book> books = new List<Book>();
         private List<Member> members = new List<Member>();
+        private int nextMemberId = 1; //This is to give the next member a unique ID.
 
         public void add_book(Book book)
         {
@@ -29,6 +30,9 @@ namespace Library_System
             {
                 throw new ArgumentNullException(nameof(member), "Member cannot be null.");
             }
+
+            var newMember = new Member(member.Name, nextMemberId++, member.Type);
+            nextMemberId++;
             members.Add(member);
         }
         public void remove_book(string title, int publicationYear)
