@@ -30,15 +30,15 @@
                 }
             }
         }
-        public BookCategory Catagory { get; set; }
+        public BookCategory Category { get; set; }
         public bool IsAvailable { get; set; }
 
-        public Book(string title, string author, int publicationYear, BookCategory catagory)
+        public Book(string title, string author, int publicationYear, BookCategory category)
         {
             Title = title;
             Author = author;
             this.publicationYear = publicationYear;
-            Catagory = catagory;
+            Category = category;
             IsAvailable = true; // Default to available
         }
     }

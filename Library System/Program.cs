@@ -28,7 +28,10 @@ namespace Library_System
                         continue;
                     }
 
-                    Console.WriteLine("Select member type: 0 - Member, 1 - Staff, 2 - Management");
+                    Console.WriteLine("Select member type:");
+                    Console.WriteLine("0 - Member");
+                    Console.WriteLine("1 - Minor Staff");
+                    Console.WriteLine("2 - Management Staff");
                     string? typeInputStr = Console.ReadLine();
 
                     if (!int.TryParse(typeInputStr, out int typeInput) || typeInput < 0 || typeInput > 2)
@@ -37,8 +40,7 @@ namespace Library_System
                         continue;
                     }
 
-                    Member.MemberType memberType = (Member.MemberType)typeInput;
-                    Member newMember = library.AddMember(name, memberType);
+                    Member newMember = library.AddMember(name, typeInput);
                     loggedInMember = newMember;
 
                     Console.WriteLine($"Successfully signed up! Your Member ID is: {newMember.MemberID}");
@@ -54,8 +56,7 @@ namespace Library_System
                         continue;
                     }
 
-                    // Check if member exists
-                    var existingMember = ((Library)library).GetMemberById(enteredId);
+                    var existingMember = library.GetMemberById(enteredId);
                     if (existingMember != null)
                     {
                         loggedInMember = existingMember;
@@ -73,7 +74,7 @@ namespace Library_System
             }
 
             Console.Clear();
-            Console.WriteLine($"Welcome, {loggedInMember.Name}! Type: {loggedInMember.Type}");
+            Console.WriteLine($"Welcome, {loggedInMember.Name}! Type: {loggedInMember.GetMemberType()}");
 
             while (true)
             {
@@ -82,14 +83,17 @@ namespace Library_System
                 Console.WriteLine("2. Remove Book");
                 Console.WriteLine("3. Borrow Book");
                 Console.WriteLine("4. Return Book");
-                if (loggedInMember.Type != Member.MemberType.Staff)
+
+                if (loggedInMember.CanViewBooks())
                 {
                     Console.WriteLine("5. Display Books");
                 }
-                if (loggedInMember.Type == Member.MemberType.Management || loggedInMember.Type == Member.MemberType.Member)
+
+                if (loggedInMember.CanViewMembers())
                 {
                     Console.WriteLine("6. Display Members");
                 }
+
                 Console.WriteLine("0. Exit");
 
                 Console.Write("Choose an option: ");
@@ -100,6 +104,12 @@ namespace Library_System
                     switch (option)
                     {
                         case "1":
+                            if (!loggedInMember.CanAddRemoveBooks())
+                            {
+                                Console.WriteLine("Access denied. You don't have permission to add books.");
+                                break;
+                            }
+
                             Console.Write("Title: ");
                             string? title = Console.ReadLine();
                             if (string.IsNullOrWhiteSpace(title))
@@ -139,6 +149,12 @@ namespace Library_System
                             break;
 
                         case "2":
+                            if (!loggedInMember.CanAddRemoveBooks())
+                            {
+                                Console.WriteLine("Access denied. You don't have permission to remove books.");
+                                break;
+                            }
+
                             Console.Write("Enter title of the book to remove: ");
                             string? removeTitle = Console.ReadLine();
                             if (string.IsNullOrWhiteSpace(removeTitle))
@@ -160,6 +176,12 @@ namespace Library_System
                             break;
 
                         case "3":
+                            if (!loggedInMember.CanBorrowBooks())
+                            {
+                                Console.WriteLine("Access denied. You cannot borrow books.");
+                                break;
+                            }
+
                             Console.Write("Enter title of the book to borrow: ");
                             string? borrowTitle = Console.ReadLine();
                             if (string.IsNullOrWhiteSpace(borrowTitle))
@@ -202,24 +224,24 @@ namespace Library_System
                             break;
 
                         case "5":
-                            if (loggedInMember.Type != Member.MemberType.Staff)
+                            if (loggedInMember.CanViewBooks())
                             {
                                 library.DisplayBooks();
                             }
                             else
                             {
-                                Console.WriteLine("Access denied. Staff cannot view books.");
+                                Console.WriteLine("Access denied. You cannot view books.");
                             }
                             break;
 
                         case "6":
-                            if (loggedInMember.Type == Member.MemberType.Management || loggedInMember.Type == Member.MemberType.Member)
+                            if (loggedInMember.CanViewMembers())
                             {
                                 library.DisplayMembers();
                             }
                             else
                             {
-                                Console.WriteLine("Access denied. Only Members and Management can view members.");
+                                Console.WriteLine("Access denied. You cannot view members.");
                             }
                             break;
 
