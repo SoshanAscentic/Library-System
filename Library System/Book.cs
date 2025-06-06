@@ -1,6 +1,6 @@
-﻿namespace LibrarySystem
+﻿namespace Library_System
 {
-    internal class Book
+    public class Book
     {
 
         public enum BookCategory

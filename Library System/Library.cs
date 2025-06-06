@@ -1,4 +1,4 @@
-﻿using LibrarySystem;
+﻿using Library_System;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Library_System
 {
-    internal class Library
+    internal class Library : ILibrary
     {
         private List<Book> books = new List<Book>();
         private List<Member> members = new List<Member>();

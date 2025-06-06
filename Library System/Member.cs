@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Library_System
 {
-    internal class Member
+    public class Member
     {
         public enum MemberType
         {
