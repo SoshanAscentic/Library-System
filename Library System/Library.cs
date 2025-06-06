@@ -24,14 +24,21 @@ namespace Library_System
             books.Add(book);
         }
 
-        public Member AddMember(string name, Member.MemberType type)
+        public Member AddMember(string name, int memberType)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
                 throw new ArgumentException("Name cannot be null or empty.", nameof(name));
             }
 
-            var newMember = new Member(name, nextMemberId++, type);
+            Member newMember = memberType switch
+            {
+                0 => new RegularMember(name, nextMemberId++),
+                1 => new MinorStaff(name, nextMemberId++),
+                2 => new ManagementStaff(name, nextMemberId++),
+                _ => throw new ArgumentException("Invalid member type.")
+            };
+
             members.Add(newMember);
             return newMember;
         }
@@ -72,9 +79,9 @@ namespace Library_System
                 throw new ArgumentException("Member not found.");
             }
 
-            if (member.Type != Member.MemberType.Member)
+            if (!member.CanBorrowBooks())
             {
-                throw new InvalidOperationException("Only members of type 'Member' can borrow books.");
+                throw new InvalidOperationException($"{member.GetMemberType()} cannot borrow books.");
             }
 
             var bookToBorrow = books.FirstOrDefault(b => b.Title == title && b.PublicationYear == publicationYear && b.IsAvailable);
@@ -123,7 +130,7 @@ namespace Library_System
             }
             foreach (var book in books)
             {
-                Console.WriteLine($"Title: {book.Title}, Author: {book.Author}, Year: {book.PublicationYear}, Category: {book.Catagory}, Available: {book.IsAvailable}");
+                Console.WriteLine($"Title: {book.Title}, Author: {book.Author}, Year: {book.PublicationYear}, Category: {book.Category}, Available: {book.IsAvailable}");
             }
         }
 
@@ -136,7 +143,7 @@ namespace Library_System
             }
             foreach (var member in members)
             {
-                Console.WriteLine($"Name: {member.Name}, ID: {member.MemberID}, Type: {member.Type}, Borrowed Books: {member.BorrowedBooksCount}");
+                Console.WriteLine($"Name: {member.Name}, ID: {member.MemberID}, Type: {member.GetMemberType()}, Borrowed Books: {member.BorrowedBooksCount}");
             }
         }
     }

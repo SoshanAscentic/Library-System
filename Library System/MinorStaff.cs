@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Library_System
+{
+    public class MinorStaff : Staff
+    {
+        public MinorStaff(string name, int memberId) : base(name, memberId) { }
+
+        public override string GetMemberType() => "Minor Staff";
+
+        public override bool CanViewBooks() => false; 
+        public override bool CanViewMembers() => false;
+    }
+}
