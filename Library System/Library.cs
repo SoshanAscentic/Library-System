@@ -143,7 +143,7 @@ namespace Library_System
             }
             foreach (var member in members)
             {
-                Console.WriteLine($"Name: {member.Name}, ID: {member.MemberID}, Type: {member.GetMemberType}, Borrowed Books: {member.BorrowedBooksCount}");
+                Console.WriteLine($"Name: {member.Name}, ID: {member.MemberID}, Type: {member.GetMemberType()}, Borrowed Books: {member.BorrowedBooksCount}");
             }
         }
     }
