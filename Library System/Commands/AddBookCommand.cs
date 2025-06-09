@@ -15,10 +15,10 @@ namespace Library_System.Commands
     {
         private readonly IBookService bookService;
 
-        public AddBookCommand(IConsoleService consoleService) : base(consoleService)
+        public AddBookCommand(IBookService bookService, IConsoleService consoleService) : base(consoleService)
         {
             this.bookService = bookService ?? throw new ArgumentNullException(nameof(bookService));
-
+            this.bookService = bookService;
         }
         public override bool CanExecute(Member member) => member.CanAddRemoveBooks();
 

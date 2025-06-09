@@ -20,7 +20,31 @@ namespace Library_System.Services
             this.consoleService = consoleService ?? throw new ArgumentNullException(nameof(consoleService));
         }
 
-        public Member? Signup()
+        public Member? Login()
+        {
+            consoleService.WriteLine("Enter your Member ID: ");
+            string? memberIdStr = consoleService.ReadLine();
+
+            if (!int.TryParse(memberIdStr, out int enteredId))
+            {
+                consoleService.WriteLine("Invalid input.");
+                return null;
+            }
+
+            var existingMember = memberService.GetMemberById(enteredId);
+            if (existingMember != null)
+            {
+                consoleService.WriteLine($"Welcome back, {existingMember.Name}!");
+                return existingMember;
+            }
+            else
+            {
+                consoleService.WriteLine("Member not found. Please sign up first.");
+                return null;
+            }
+        }
+
+        public Member? SignUp()
         {
             consoleService.WriteLine("Enter your name: ");
             string? name = consoleService.ReadLine();
@@ -47,29 +71,6 @@ namespace Library_System.Services
             consoleService.WriteLine($"Successfully signed up! Your Member ID is: {newMember.MemberID}");
             return newMember;
         }
-
-        public Member? Login()
-        {
-            consoleService.WriteLine("Enter your Member ID: ");
-            string? memberIdStr = consoleService.ReadLine();
-
-            if (!int.TryParse(memberIdStr, out int enteredId))
-            {
-                consoleService.WriteLine("Invalid input.");
-                return null;
-            }
-
-            var existingMember = memberService.GetMemberById(enteredId);
-            if (existingMember != null)
-            {
-                consoleService.WriteLine($"Welcome back, {existingMember.Name}!");
-                return existingMember;
-            }
-            else
-            {
-                consoleService.WriteLine("Member not found. Please sign up first.");
-                return null;
-            }
-        }
     }
+    
 }
