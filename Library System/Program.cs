@@ -44,7 +44,7 @@ namespace Library_System
                         continue;
                     }
 
-                    Member newMember = library.AddMember(name, typeInput);
+                    Member newMember = library.MemberService.AddMember(name, typeInput);
                     loggedInMember = newMember;
 
                     Console.WriteLine($"Successfully signed up! Your Member ID is: {newMember.MemberID}");
@@ -60,7 +60,7 @@ namespace Library_System
                         continue;
                     }
 
-                    var existingMember = library.GetMemberById(enteredId);
+                    var existingMember = library.MemberService.GetMemberById(enteredId);
                     if (existingMember != null)
                     {
                         loggedInMember = existingMember;
@@ -148,7 +148,7 @@ namespace Library_System
 
                             Book.BookCategory category = (Book.BookCategory)categoryInt;
                             Book book = new Book(title, author, pubYear, category);
-                            library.AddBook(book);
+                            library.BookService.AddBook(book);
                             Console.WriteLine("Book added successfully.");
                             break;
 
@@ -175,7 +175,7 @@ namespace Library_System
                                 break;
                             }
 
-                            library.RemoveBook(removeTitle, removeYear);
+                            library.BookService.RemoveBook(removeTitle, removeYear);
                             Console.WriteLine("Book removed successfully.");
                             break;
 
@@ -202,7 +202,7 @@ namespace Library_System
                                 break;
                             }
 
-                            library.BorrowBook(borrowTitle, borrowYear, loggedInMember.MemberID);
+                            library.BorrowingService.BorrowBook(borrowTitle, borrowYear, loggedInMember.MemberID);
                             Console.WriteLine("Book borrowed successfully.");
                             break;
 
@@ -223,14 +223,14 @@ namespace Library_System
                                 break;
                             }
 
-                            library.ReturnBook(returnTitle, returnYear, loggedInMember.MemberID);
+                            library.BorrowingService.ReturnBook(returnTitle, returnYear, loggedInMember.MemberID);
                             Console.WriteLine("Book returned successfully.");
                             break;
 
                         case "5":
                             if (loggedInMember.CanViewBooks())
                             {
-                                library.DisplayBooks();
+                                library.BookService.DisplayBooks();
                             }
                             else
                             {
@@ -241,7 +241,7 @@ namespace Library_System
                         case "6":
                             if (loggedInMember.CanViewMembers())
                             {
-                                library.DisplayMembers();
+                                library.MemberService.DisplayMembers();
                             }
                             else
                             {
