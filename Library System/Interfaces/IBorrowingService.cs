@@ -9,6 +9,6 @@ namespace Library_System.Interfaces
     public interface IBorrowingService
     {
         void BorrowBook(string title, int publicationYear, int memberId);
-        void ReturnBook(string title, int publicationYear, int memberId
+        void ReturnBook(string title, int publicationYear, int memberId);
     }
 }
