@@ -1,4 +1,4 @@
-﻿namespace Library_System
+﻿namespace Library_System.Models
 {
     public class Book
     {

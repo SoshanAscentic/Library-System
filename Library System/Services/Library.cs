@@ -1,4 +1,7 @@
-﻿using Library_System;
+﻿using Library_System.Interfaces;
+using Library_System.Models;
+using Library_System.Models.Members;
+using Library_System.Models.Staff;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -7,7 +10,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Library_System
+namespace Library_System.Services
 {
     internal class Library : ILibrary
     {

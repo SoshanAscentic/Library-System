@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Library_System
+namespace Library_System.Models.Staff
 {
     public class ManagementStaff : Staff
     {
