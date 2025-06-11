@@ -9,10 +9,6 @@ namespace Library_System.Models.Staff
     public class MinorStaff : Staff
     {
         public MinorStaff(string name, int memberId) : base(name, memberId) { }
-
         public override string GetMemberType() => "Minor Staff";
-
-        public override bool CanViewBooks() => false; 
-        public override bool CanViewMembers() => false;
     }
 }

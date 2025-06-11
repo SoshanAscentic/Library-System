@@ -8,15 +8,11 @@ namespace Library_System.Models.Members
 {
     public class RegularMember : Member
     {
-        public RegularMember(string name, int memberId) : base(name, memberId)
-        {
+        public RegularMember(string name, int memberId) : base(name, memberId) { }
 
-        }
         public override string GetMemberType() => "Member";
         public override bool CanBorrowBooks() => true;
         public override bool CanViewBooks() => true;
         public override bool CanViewMembers() => true;
-        public override bool CanAddRemoveBooks() => false; 
-
     }
 }

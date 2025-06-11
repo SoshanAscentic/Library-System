@@ -11,60 +11,54 @@ namespace Library_System.Services
     public class BookService : IBookService
     {
         private readonly List<Book> books;
+        private readonly IConsoleService console;
 
-        public BookService(List<Book> books)
+        public BookService(List<Book> books, IConsoleService console)
         {
             this.books = books ?? throw new ArgumentNullException(nameof(books));
+            this.console = console ?? throw new ArgumentNullException(nameof(console));
         }
 
         public void AddBook(Book book)
         {
-            if (book == null)
-            {
-                throw new ArgumentNullException(nameof(book), "Book cannot be null.");
-            }
-            books.Add(book);
+            books.Add(book ?? throw new ArgumentNullException(nameof(book)));
         }
 
         public void RemoveBook(string title, int publicationYear)
         {
-            if (string.IsNullOrWhiteSpace(title))
+            var book = GetBook(title, publicationYear);
+            if (book != null)
             {
-                throw new ArgumentException("Title cannot be null or empty.", nameof(title));
-            }
-
-            var bookToRemove = books.FirstOrDefault(b => b.Title == title && b.PublicationYear == publicationYear);
-            if (bookToRemove != null)
-            {
-                books.Remove(bookToRemove);
+                books.Remove(book);
             }
             else
             {
-                throw new ArgumentException("Book not found in the library.");
+                throw new InvalidOperationException("Book not found.");
             }
         }
 
         public void DisplayBooks()
         {
-            if (books.Count == 0)
+            if (!books.Any())
             {
-                Console.WriteLine("No books available in the library.");
+                console.WriteLine("No books available in the library.");
                 return;
             }
+
+            console.WriteLine("\n=== Library Books ===");
             foreach (var book in books)
             {
-                Console.WriteLine($"Title: {book.Title}, Author: {book.Author}, Year: {book.PublicationYear}, Category: {book.Category}, Available: {book.IsAvailable}");
+                console.WriteLine(book.ToString());
             }
         }
 
         public Book? GetBook(string title, int publicationYear)
         {
-            return books.FirstOrDefault(b => b.Title == title && b.PublicationYear == publicationYear);
+            return books.FirstOrDefault(b =>
+                string.Equals(b.Title, title, StringComparison.OrdinalIgnoreCase) &&
+                b.PublicationYear == publicationYear);
         }
 
-        public IEnumerable<Book> GetAllBooks()
-        {
-            return books.AsReadOnly();
-        }
+        public IEnumerable<Book> GetAllBooks() => books.AsReadOnly();
     }
 }

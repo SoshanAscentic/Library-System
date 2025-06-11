@@ -12,9 +12,7 @@ namespace Library_System.Interfaces
         void AddBook(Book book);
         void RemoveBook(string title, int publicationYear);
         void DisplayBooks();
-
         Book? GetBook(string title, int publicationYear);
-
         IEnumerable<Book> GetAllBooks();
     }
 }

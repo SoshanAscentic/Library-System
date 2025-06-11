@@ -10,9 +10,6 @@ namespace Library_System.Models.Staff
     {
         public ManagementStaff(string name, int memberId) : base(name, memberId) { }
         public override string GetMemberType() => "Management Staff";
-        public override bool CanViewBooks() => true;
-        public override bool CanViewMembers() => true;
-        public override bool CanAddRemoveBooks() => true; 
     }
-    
+
 }

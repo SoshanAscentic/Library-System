@@ -1,4 +1,6 @@
 ﻿using Library_System.Interfaces;
+using Library_System.Models.Members;
+using Library_System.Models.Staff;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +13,7 @@ namespace Library_System.Services
     {
         private readonly IBookService bookService;
         private readonly IMemberService memberService;
+
         public BorrowingService(IBookService bookService, IMemberService memberService)
         {
             this.bookService = bookService ?? throw new ArgumentNullException(nameof(bookService));
@@ -19,57 +22,35 @@ namespace Library_System.Services
 
         public void BorrowBook(string title, int publicationYear, int memberId)
         {
-            if (string.IsNullOrWhiteSpace(title))
-            {
-                throw new ArgumentException("Title cannot be null or empty.", nameof(title));
-            }
-
-            var member = memberService.GetMemberById(memberId);
-            if (member == null)
-            {
-                throw new ArgumentException("Member not found.");
-            }
-
+            var member = GetValidMember(memberId);
             if (!member.CanBorrowBooks())
-            {
                 throw new InvalidOperationException($"{member.GetMemberType()} cannot borrow books.");
-            }
 
-            var bookToBorrow = bookService.GetBook(title, publicationYear);
-            if (bookToBorrow != null && bookToBorrow.IsAvailable)
-            {
-                bookToBorrow.IsAvailable = false;
-                member.BorrowedBooksCount++;
-            }
-            else
-            {
-                throw new ArgumentException("Book not available for borrowing.");
-            }
+            var book = bookService.GetBook(title, publicationYear);
+            if (book == null || !book.IsAvailable)
+                throw new InvalidOperationException("Book not available for borrowing.");
+
+            book.IsAvailable = false;
+            member.BorrowedBooksCount++;
         }
 
         public void ReturnBook(string title, int publicationYear, int memberId)
         {
-            if (string.IsNullOrWhiteSpace(title))
-            {
-                throw new ArgumentException("Title cannot be null or empty.", nameof(title));
-            }
+            var member = GetValidMember(memberId);
+            var book = bookService.GetBook(title, publicationYear);
 
-            var member = memberService.GetMemberById(memberId);
-            if (member == null)
-            {
-                throw new ArgumentException("Member not found.");
-            }
+            if (book == null || book.IsAvailable)
+                throw new InvalidOperationException("Book not found or not currently borrowed.");
 
-            var bookToReturn = bookService.GetBook(title, publicationYear);
-            if (bookToReturn != null && !bookToReturn.IsAvailable)
-            {
-                bookToReturn.IsAvailable = true;
+            book.IsAvailable = true;
+            if (member.BorrowedBooksCount > 0)
                 member.BorrowedBooksCount--;
-            }
-            else
-            {
-                throw new ArgumentException("Book not found or not borrowed by this member.");
-            }
+        }
+
+        private Member GetValidMember(int memberId)
+        {
+            return memberService.GetMemberById(memberId) ??
+                   throw new InvalidOperationException("Member not found.");
         }
     }
 }

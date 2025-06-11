@@ -9,13 +9,10 @@ namespace Library_System.Models.Staff
 {
     public abstract class Staff : Member
     {
-        public Staff(string name, int memberId) : base(name, memberId)
-        {
-        }
+        protected Staff(string name, int memberId) : base(name, memberId) { }
 
-        public override bool CanAddRemoveBooks() => true;
-
+        public override bool CanManageBooks() => true;
+        public override bool CanViewBooks() => true;
+        public override bool CanViewMembers() => true;
     }
-    
-    
 }

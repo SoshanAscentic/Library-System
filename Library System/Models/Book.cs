@@ -1,45 +1,59 @@
-﻿namespace Library_System.Models
+﻿public class Book
 {
-    public class Book
+    public enum BookCategory { Fiction, History, Child }
+
+    private string _title;
+    private string _author;
+    private int _publicationYear;
+
+    public string Title
     {
-
-        public enum BookCategory
+        get => _title;
+        set
         {
-            Fiction,
-            History,
-            Child
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Title cannot be null or empty.", nameof(Title));
+            _title = value.Trim();
         }
-        public string Title { get; set; }
-        public string Author { get; set; }
+    }
 
-        private int publicationYear;
-        public int PublicationYear
+    public string Author
+    {
+        get => _author;
+        set
         {
-            get { return publicationYear; }
-            set
-            {
-
-                if (value >= 1450 && value <= DateTime.Now.Year)
-                {
-                    publicationYear = value;
-
-                }
-                else
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value), "Publication year must be between 1450 and the current year.");
-                }
-            }
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Author cannot be null or empty.", nameof(Author));
+            _author = value.Trim();
         }
-        public BookCategory Category { get; set; }
-        public bool IsAvailable { get; set; }
+    }
 
-        public Book(string title, string author, int publicationYear, BookCategory category)
+    public int PublicationYear
+    {
+        get => _publicationYear;
+        set
         {
-            Title = title;
-            Author = author;
-            this.publicationYear = publicationYear;
-            Category = category;
-            IsAvailable = true; // Default to available
+            if (value < 1450 || value > DateTime.Now.Year)
+                throw new ArgumentOutOfRangeException(nameof(PublicationYear),
+                    $"Publication year must be between 1450 and {DateTime.Now.Year}.");
+            _publicationYear = value;
         }
+    }
+
+    public BookCategory Category { get; set; }
+    public bool IsAvailable { get; set; }
+
+    public Book(string title, string author, int publicationYear, BookCategory category)
+    {
+        Title = title;              
+        Author = author;           
+        PublicationYear = publicationYear;  
+        Category = category;
+        IsAvailable = true;
+    }
+
+    public override string ToString()
+    {
+        return $"Title: {Title}, Author: {Author}, Year: {PublicationYear}, Category: {Category}, Available: {IsAvailable}";
     }
 }
