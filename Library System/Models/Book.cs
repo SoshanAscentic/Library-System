@@ -2,41 +2,41 @@
 {
     public enum BookCategory { Fiction, History, Child }
 
-    private string _title;
-    private string _author;
-    private int _publicationYear;
+    private string title;
+    private string author;
+    private int publicationYear;
 
     public string Title
     {
-        get => _title;
+        get => title;
         set
         {
             if (string.IsNullOrWhiteSpace(value))
                 throw new ArgumentException("Title cannot be null or empty.", nameof(Title));
-            _title = value.Trim();
+            title = value.Trim();
         }
     }
 
     public string Author
     {
-        get => _author;
+        get => author;
         set
         {
             if (string.IsNullOrWhiteSpace(value))
                 throw new ArgumentException("Author cannot be null or empty.", nameof(Author));
-            _author = value.Trim();
+            author = value.Trim();
         }
     }
 
     public int PublicationYear
     {
-        get => _publicationYear;
+        get => publicationYear;
         set
         {
             if (value < 1450 || value > DateTime.Now.Year)
                 throw new ArgumentOutOfRangeException(nameof(PublicationYear),
                     $"Publication year must be between 1450 and {DateTime.Now.Year}.");
-            _publicationYear = value;
+            publicationYear = value;
         }
     }
 

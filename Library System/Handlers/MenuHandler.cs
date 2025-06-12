@@ -1,9 +1,7 @@
 ﻿using Library_System.Interfaces;
+using Library_System.Models;
+using Library_System.Models.Members;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Library_System.Handlers
 {
@@ -14,194 +12,269 @@ namespace Library_System.Handlers
         private readonly IBorrowingService borrowingService;
         private readonly IConsoleService console;
         private readonly IInputService input;
+        private readonly IAuthenticationService authService;
+        
+        private Member? currentUser;
 
-        public MenuHandler(IBookService bookService, IMemberService memberService,
-            IBorrowingService borrowingService, IConsoleService console, IInputService input)
+        public MenuHandler(
+            IBookService bookService,
+            IMemberService memberService,
+            IBorrowingService borrowingService,
+            IConsoleService console,
+            IInputService input,
+            IAuthenticationService authService)
         {
             this.bookService = bookService ?? throw new ArgumentNullException(nameof(bookService));
             this.memberService = memberService ?? throw new ArgumentNullException(nameof(memberService));
             this.borrowingService = borrowingService ?? throw new ArgumentNullException(nameof(borrowingService));
             this.console = console ?? throw new ArgumentNullException(nameof(console));
             this.input = input ?? throw new ArgumentNullException(nameof(input));
+            this.authService = authService ?? throw new ArgumentNullException(nameof(authService));
         }
 
         public void Run()
         {
-            var currentMember = AuthenticateUser();
-            if (currentMember == null) return;
-
-            ShowWelcome(currentMember);
-            ShowMainMenu(currentMember);
-        }
-
-        private Member? AuthenticateUser()
-        {
+            console.WriteLine("=== Welcome to the Library Management System ===");
+            
             while (true)
             {
-                ShowAuthMenu();
-                var choice = input.GetIntegerInputInRange("Choose option (1-2): ", 1, 2);
-
-                if (!choice.HasValue) continue;
-
-                var member = choice.Value switch
+                if (currentUser == null)
                 {
-                    1 => SignUpUser(),
-                    2 => LoginUser(),
-                    _ => null
-                };
-
-                if (member != null) return member;
-            }
-        }
-
-        private void ShowAuthMenu()
-        {
-            console.WriteLine("\n=== Welcome to Library System ===");
-            console.WriteLine("1. Sign up as new member");
-            console.WriteLine("2. Login with Member ID");
-        }
-
-        private Member? SignUpUser()
-        {
-            var name = input.GetNonEmptyInput("Enter your name: ");
-            if (name == null) return null;
-
-            console.WriteLine("\nSelect member type:");
-            console.WriteLine("0 - Regular Member");
-            console.WriteLine("1 - Minor Staff");
-            console.WriteLine("2 - Management Staff");
-
-            var memberType = input.GetIntegerInputInRange("Choose type (0-2): ", 0, 2);
-            if (!memberType.HasValue) return null;
-
-            try
-            {
-                var newMember = memberService.AddMember(name, memberType.Value);
-                console.WriteLine($"Registration successful! Your Member ID is: {newMember.MemberID}");
-                return newMember;
-            }
-            catch (Exception ex)
-            {
-                console.WriteLine($"Registration failed: {ex.Message}");
-                return null;
-            }
-        }
-
-        private Member? LoginUser()
-        {
-            var memberId = input.GetIntegerInput("Enter your Member ID: ");
-            if (!memberId.HasValue) return null;
-
-            var member = memberService.GetMemberById(memberId.Value);
-            if (member != null)
-            {
-                console.WriteLine($"Welcome back, {member.Name}!");
-                return member;
-            }
-
-            console.WriteLine("Member not found. Please sign up first.");
-            return null;
-        }
-
-        private void ShowWelcome(Member member)
-        {
-            console.Clear();
-            console.WriteLine($"=== Welcome, {member.Name}! ===");
-            console.WriteLine($"Member Type: {member.GetMemberType()}");
-        }
-
-        private void ShowMainMenu(Member member)
-        {
-            while (true)
-            {
-                try
-                {
-                    console.WriteLine("\n=== Main Menu ===");
-                    console.WriteLine("1. Add Book");
-                    console.WriteLine("2. Remove Book");
-                    console.WriteLine("3. Borrow Book");
-                    console.WriteLine("4. Return Book");
-                    console.WriteLine("5. View All Books");
-                    console.WriteLine("6. View All Members");
-                    console.WriteLine("0. Exit");
-
-                    var choice = input.GetIntegerInputInRange("Choose option (0-6): ", 0, 6);
-                    if (!choice.HasValue) continue;
-
-                    if (choice.Value == 0)
-                    {
-                        console.WriteLine("Thank you for using the Library System!");
-                        break;
-                    }
-
-                    HandleMenuChoice(choice.Value, member);
+                    ShowAuthenticationMenu();
                 }
-                catch (Exception ex)
+                else
                 {
-                    console.WriteLine($"Error: {ex.Message}");
+                    ShowMainMenu();
                 }
             }
         }
 
-        private void HandleMenuChoice(int choice, Member member)
+        private void ShowAuthenticationMenu()
         {
+            console.WriteLine("\n=== Authentication Menu ===");
+            console.WriteLine("1. Login");
+            console.WriteLine("2. Sign Up");
+            console.WriteLine("3. Exit");
+            console.Write("Choose an option: ");
+
+            var choice = input.GetIntegerInputInRange("", 1, 3);
+            if (choice == null) return;
+
             switch (choice)
             {
-                case 1: HandleAddBook(member); break;
-                case 2: HandleRemoveBook(member); break;
-                case 3: HandleBorrowBook(member); break;
-                case 4: HandleReturnBook(member); break;
-                case 5: HandleViewBooks(member); break;
-                case 6: HandleViewMembers(member); break;
+                case 1:
+                    currentUser = authService.Login();
+                    break;
+                case 2:
+                    currentUser = authService.SignUp();
+                    break;
+                case 3:
+                    console.WriteLine("Thank you for using the Library Management System!");
+                    Environment.Exit(0);
+                    break;
             }
         }
 
-        private void HandleAddBook(Member member)
+        private void ShowMainMenu()
         {
-            if (!member.CanManageBooks())
+            console.WriteLine($"\n=== Main Menu - Welcome {currentUser!.Name} ({currentUser.GetMemberType()}) ===");
+            
+            int optionNumber = 1;
+            
+            // Show options based on user permissions
+            if (currentUser.CanViewBooks())
             {
-                console.WriteLine("Access denied. You don't have permission to add books.");
+                console.WriteLine($"{optionNumber++}. View All Books");
+            }
+            
+            if (currentUser.CanBorrowBooks())
+            {
+                console.WriteLine($"{optionNumber++}. Borrow Book");
+                console.WriteLine($"{optionNumber++}. Return Book");
+            }
+            
+            if (currentUser.CanViewMembers())
+            {
+                console.WriteLine($"{optionNumber++}. View All Members");
+            }
+            
+            if (currentUser.CanManageBooks())
+            {
+                console.WriteLine($"{optionNumber++}. Add Book");
+                console.WriteLine($"{optionNumber++}. Remove Book");
+            }
+            
+            console.WriteLine($"{optionNumber++}. View My Profile");
+            console.WriteLine($"{optionNumber}. Logout");
+
+            var choice = input.GetIntegerInputInRange("Choose an option: ", 1, optionNumber);
+            if (choice == null) return;
+
+            ProcessMainMenuChoice(choice.Value);
+        }
+
+        private void ProcessMainMenuChoice(int choice)
+        {
+            int currentOption = 1;
+
+            if (currentUser!.CanViewBooks() && choice == currentOption++)
+            {
+                ViewAllBooks();
                 return;
             }
 
-            var title = input.GetNonEmptyInput("Book Title: ");
+            if (currentUser.CanBorrowBooks())
+            {
+                if (choice == currentOption++)
+                {
+                    BorrowBook();
+                    return;
+                }
+                if (choice == currentOption++)
+                {
+                    ReturnBook();
+                    return;
+                }
+            }
+
+            if (currentUser.CanViewMembers() && choice == currentOption++)
+            {
+                ViewAllMembers();
+                return;
+            }
+
+            if (currentUser.CanManageBooks())
+            {
+                if (choice == currentOption++)
+                {
+                    AddBook();
+                    return;
+                }
+                if (choice == currentOption++)
+                {
+                    RemoveBook();
+                    return;
+                }
+            }
+
+            if (choice == currentOption++)
+            {
+                ViewMyProfile();
+                return;
+            }
+
+            if (choice == currentOption)
+            {
+                console.WriteLine("Logged out successfully!");
+                currentUser = null;
+            }
+        }
+
+        private void ViewAllBooks()
+        {
+            console.WriteLine("\n=== All Books ===");
+            bookService.DisplayBooks();
+            WaitForKeyPress();
+        }
+
+        private void BorrowBook()
+        {
+            console.WriteLine("\n=== Borrow Book ===");
+            
+            var title = input.GetNonEmptyInput("Enter book title: ");
             if (title == null) return;
 
-            var author = input.GetNonEmptyInput("Author: ");
-            if (author == null) return;
-
-            var year = input.GetIntegerInput("Publication Year: ");
-            if (!year.HasValue) return;
-
-            console.WriteLine("Category (0-Fiction, 1-History, 2-Child): ");
-            var category = input.GetIntegerInputInRange("", 0, 2);
-            if (!category.HasValue) return;
+            var year = input.GetIntegerInput("Enter publication year: ");
+            if (year == null) return;
 
             try
             {
-                var book = new Book(title, author, year.Value, (Book.BookCategory)category.Value);
+                borrowingService.BorrowBook(title, year.Value, currentUser!.MemberID);
+                console.WriteLine("Book borrowed successfully!");
+            }
+            catch (Exception ex)
+            {
+                console.WriteLine($"Error: {ex.Message}");
+            }
+            
+            WaitForKeyPress();
+        }
+
+        private void ReturnBook()
+        {
+            console.WriteLine("\n=== Return Book ===");
+            
+            var title = input.GetNonEmptyInput("Enter book title: ");
+            if (title == null) return;
+
+            var year = input.GetIntegerInput("Enter publication year: ");
+            if (year == null) return;
+
+            try
+            {
+                borrowingService.ReturnBook(title, year.Value, currentUser!.MemberID);
+                console.WriteLine("Book returned successfully!");
+            }
+            catch (Exception ex)
+            {
+                console.WriteLine($"Error: {ex.Message}");
+            }
+            
+            WaitForKeyPress();
+        }
+
+        private void ViewAllMembers()
+        {
+            console.WriteLine("\n=== All Members ===");
+            memberService.DisplayMembers();
+            WaitForKeyPress();
+        }
+
+        private void AddBook()
+        {
+            console.WriteLine("\n=== Add Book ===");
+            
+            var title = input.GetNonEmptyInput("Enter book title: ");
+            if (title == null) return;
+
+            var author = input.GetNonEmptyInput("Enter book author: ");
+            if (author == null) return;
+
+            var year = input.GetIntegerInput("Enter publication year: ");
+            if (year == null) return;
+
+            console.WriteLine("Select book category:");
+            console.WriteLine("0. Fiction");
+            console.WriteLine("1. History");
+            console.WriteLine("2. Child");
+
+            var categoryChoice = input.GetIntegerInputInRange("Enter category (0-2): ", 0, 2);
+            if (categoryChoice == null) return;
+
+            try
+            {
+                var category = (Book.BookCategory)categoryChoice.Value;
+                var book = new Book(title, author, year.Value, category);
                 bookService.AddBook(book);
                 console.WriteLine("Book added successfully!");
             }
             catch (Exception ex)
             {
-                console.WriteLine($"Failed to add book: {ex.Message}");
+                console.WriteLine($"Error: {ex.Message}");
             }
+            
+            WaitForKeyPress();
         }
 
-        private void HandleRemoveBook(Member member)
+        private void RemoveBook()
         {
-            if (!member.CanManageBooks())
-            {
-                console.WriteLine("Access denied. You don't have permission to remove books.");
-                return;
-            }
-
-            var title = input.GetNonEmptyInput("Book Title to remove: ");
+            console.WriteLine("\n=== Remove Book ===");
+            
+            var title = input.GetNonEmptyInput("Enter book title: ");
             if (title == null) return;
 
-            var year = input.GetIntegerInput("Publication Year: ");
-            if (!year.HasValue) return;
+            var year = input.GetIntegerInput("Enter publication year: ");
+            if (year == null) return;
 
             try
             {
@@ -210,74 +283,28 @@ namespace Library_System.Handlers
             }
             catch (Exception ex)
             {
-                console.WriteLine($"Failed to remove book: {ex.Message}");
+                console.WriteLine($"Error: {ex.Message}");
             }
+            
+            WaitForKeyPress();
         }
 
-        private void HandleBorrowBook(Member member)
+        private void ViewMyProfile()
         {
-            if (!member.CanBorrowBooks())
-            {
-                console.WriteLine("Access denied. You cannot borrow books.");
-                return;
-            }
-
-            var title = input.GetNonEmptyInput("Book Title to borrow: ");
-            if (title == null) return;
-
-            var year = input.GetIntegerInput("Publication Year: ");
-            if (!year.HasValue) return;
-
-            try
-            {
-                borrowingService.BorrowBook(title, year.Value, member.MemberID);
-                console.WriteLine("Book borrowed successfully!");
-            }
-            catch (Exception ex)
-            {
-                console.WriteLine($"Failed to borrow book: {ex.Message}");
-            }
+            console.WriteLine("\n=== My Profile ===");
+            console.WriteLine(currentUser!.ToString());
+            console.WriteLine($"Permissions:");
+            console.WriteLine($"- Can Borrow Books: {currentUser.CanBorrowBooks()}");
+            console.WriteLine($"- Can View Books: {currentUser.CanViewBooks()}");
+            console.WriteLine($"- Can View Members: {currentUser.CanViewMembers()}");
+            console.WriteLine($"- Can Manage Books: {currentUser.CanManageBooks()}");
+            WaitForKeyPress();
         }
 
-        private void HandleReturnBook(Member member)
+        private void WaitForKeyPress()
         {
-            var title = input.GetNonEmptyInput("Book Title to return: ");
-            if (title == null) return;
-
-            var year = input.GetIntegerInput("Publication Year: ");
-            if (!year.HasValue) return;
-
-            try
-            {
-                borrowingService.ReturnBook(title, year.Value, member.MemberID);
-                console.WriteLine("Book returned successfully!");
-            }
-            catch (Exception ex)
-            {
-                console.WriteLine($"Failed to return book: {ex.Message}");
-            }
-        }
-
-        private void HandleViewBooks(Member member)
-        {
-            if (!member.CanViewBooks())
-            {
-                console.WriteLine("Access denied. You cannot view books.");
-                return;
-            }
-
-            bookService.DisplayBooks();
-        }
-
-        private void HandleViewMembers(Member member)
-        {
-            if (!member.CanViewMembers())
-            {
-                console.WriteLine("Access denied. You cannot view members.");
-                return;
-            }
-
-            memberService.DisplayMembers();
+            console.WriteLine("\nPress any key to continue...");
+            console.ReadLine();
         }
     }
 }
